@@ -274,8 +274,8 @@ class AlgoStrategy(gamelib.AlgoCore):
         
         # While we have remaining bits to spend lets send out scramblers randomly.
         left, right = self.get_nice_spawn(game_state)
-        game_state.attempt_spawn(SCRAMBLER, left, n=int(self.min_ping_threshold/6))
-        game_state.attempt_spawn(SCRAMBLER, right, n=int(self.min_ping_threshold/6))
+        game_state.attempt_spawn(SCRAMBLER, left, num=int(self.min_ping_threshold/6))
+        game_state.attempt_spawn(SCRAMBLER, right, num=int(self.min_ping_threshold/6))
 
     def emp_line_strategy(self, game_state):
         """
