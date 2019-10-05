@@ -27,6 +27,7 @@ class AlgoStrategy(gamelib.AlgoCore):
         self.min_ping_threshold = 6
         self.ping_cannon_last_turn = False
         self.last_enemy_health = 40
+        self.funnel_spawned = False
         gamelib.debug_write('Random seed: {}'.format(seed))
 
     def on_game_start(self, config):
@@ -155,10 +156,17 @@ class AlgoStrategy(gamelib.AlgoCore):
             spawn_points = []
             destructor_points = []
     
-        for _ in spawn_points:
-            game_state.attempt_spawn(ENCRYPTOR, _)
-        for _ in destructor_points:
-            game_state.attempt_spawn(DESTRUCTOR, _)
+        if self.funnel_spawned:
+            for _ in spawn_points:
+                game_state.attempt_spawn(DESTRUCTOR, _)
+            for _ in destructor_points:
+                game_state.attempt_spawn(DESTRUCTOR, _)
+        else:
+            self.funnel_spawned = True
+            for _ in spawn_points:
+                game_state.attempt_spawn(ENCRYPTOR, _)
+            for _ in destructor_points:
+                game_state.attempt_spawn(DESTRUCTOR, _)
 
     def build_reactive_defense(self, game_state):
         """
