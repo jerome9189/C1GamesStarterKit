@@ -158,7 +158,10 @@ class AlgoStrategy(gamelib.AlgoCore):
     
         if self.funnel_spawned:
             for _ in spawn_points:
-                game_state.attempt_spawn(DESTRUCTOR, _)
+                if random.random() <= 0.7:
+                    game_state.attempt_spawn(DESTRUCTOR, _)
+                else:
+                    game_state.attempt_spawn(FILTER, _)
             for _ in destructor_points:
                 game_state.attempt_spawn(DESTRUCTOR, _)
         else:
