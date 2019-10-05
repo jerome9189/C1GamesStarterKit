@@ -82,7 +82,7 @@ class AlgoStrategy(gamelib.AlgoCore):
 
         if game_state._player_resources[0]['bits'] >= self.min_ping_threshold:
             self.ping_cannon(game_state, game_state._player_resources[0]['bits'])
-        
+
         if game_state._player_resources[1]['bits'] >= 6: 
             self.stall_with_scramblers(game_state)
 
@@ -131,8 +131,11 @@ class AlgoStrategy(gamelib.AlgoCore):
         # attempt_spawn will try to spawn units if we have resources, and will check if a blocking unit is already there
         game_state.attempt_spawn(DESTRUCTOR, destructors_points)
 
-    def build_triangle_funnel(self, game_state):
-        spawn_points = [[14, 13], [15, 13], [16, 13], [17, 13], [18, 13], [19, 13], [20, 13], [21, 13], [22, 13], [23, 13], [14, 12], [22, 12], [14, 11], [21, 11], [14, 10], [20, 10], [14, 9], [19, 9], [14, 8], [18, 8], [14, 7], [17, 7], [14, 6], [16, 6], [14, 5], [15, 5], [14, 4]]
+    def build_triangle_funnel(self, game_state, side='right'):
+        if side.startswith('r'):
+            spawn_points = [[14, 13], [15, 13], [16, 13], [17, 13], [18, 13], [19, 13], [20, 13], [21, 13], [22, 13], [23, 13], [14, 12], [22, 12], [14, 11], [21, 11], [14, 10], [20, 10], [14, 9], [19, 9], [14, 8], [18, 8], [14, 7], [17, 7], [14, 6], [16, 6], [14, 5], [15, 5], [14, 4]]
+        elif side.startswith('l'):
+            spawn_points = []
         game_state.attempt_spawn(ENCRYPTOR, spawn_points)
 
     def build_reactive_defense(self, game_state):
