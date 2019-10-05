@@ -20,8 +20,6 @@ Advanced strategy tips:
 """
 
 class AlgoStrategy(gamelib.AlgoCore):
-    DEFENSE_WEIGHTS = {"FILTER": 1, "ENCRYPTOR": 1, "DESTRUCTOR": 2}
-
     def __init__(self):
         super().__init__()
         seed = random.randrange(maxsize)
