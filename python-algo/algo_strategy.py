@@ -76,29 +76,30 @@ class AlgoStrategy(gamelib.AlgoCore):
         self.build_defences(game_state)
         # Now build reactive defenses based on where the enemy scored
         self.build_reactive_defense(game_state)
+        self.stall_with_scramblers(game_state)
 
         # If the turn is less than 5, stall with Scramblers and wait to see enemy's base
-        if game_state.turn_number < 5:
-            self.stall_with_scramblers(game_state)
-        else:
-            # Now let's analyze the enemy base to see where their defenses are concentrated.
-            # If they have many units in the front we can build a line for our EMPs to attack them at long range.
-            if self.detect_enemy_unit(game_state, unit_type=None, valid_x=None, valid_y=[14, 15]) > 10:
-                self.emp_line_strategy(game_state)
-            else:
-                # They don't have many units in the front so lets figure out their least defended area and send Pings there.
+        # if game_state.turn_number < 5:
+        #     self.stall_with_scramblers(game_state)
+        # else:
+        #     # Now let's analyze the enemy base to see where their defenses are concentrated.
+        #     # If they have many units in the front we can build a line for our EMPs to attack them at long range.
+        #     if self.detect_enemy_unit(game_state, unit_type=None, valid_x=None, valid_y=[14, 15]) > 10:
+        #         self.emp_line_strategy(game_state)
+        #     else:
+        #         # They don't have many units in the front so lets figure out their least defended area and send Pings there.
 
-                # Only spawn Ping's every other turn
-                # Sending more at once is better since attacks can only hit a single ping at a time
-                if game_state.turn_number % 2 == 1:
-                    # To simplify we will just check sending them from back left and right
-                    ping_spawn_location_options = [[13, 0], [14, 0]]
-                    best_location = self.least_damage_spawn_location(game_state, ping_spawn_location_options)
-                    game_state.attempt_spawn(PING, best_location, 1000)
+        #         # Only spawn Ping's every other turn
+        #         # Sending more at once is better since attacks can only hit a single ping at a time
+        #         if game_state.turn_number % 2 == 1:
+        #             # To simplify we will just check sending them from back left and right
+        #             ping_spawn_location_options = [[13, 0], [14, 0]]
+        #             best_location = self.least_damage_spawn_location(game_state, ping_spawn_location_options)
+        #             game_state.attempt_spawn(PING, best_location, 1000)
 
-                # Lastly, if we have spare cores, let's build some Encryptors to boost our Pings' health.
-                encryptor_locations = [[13, 2], [14, 2], [13, 3], [14, 3]]
-                game_state.attempt_spawn(ENCRYPTOR, encryptor_locations)
+        #         # Lastly, if we have spare cores, let's build some Encryptors to boost our Pings' health.
+        #         encryptor_locations = [[13, 2], [14, 2], [13, 3], [14, 3]]
+        #         game_state.attempt_spawn(ENCRYPTOR, encryptor_locations)
 
     def build_defences(self, game_state):
         """
@@ -141,6 +142,21 @@ class AlgoStrategy(gamelib.AlgoCore):
                     if [point[0], point[1] - 1] not in czech_republic_black_sites:
                         game_state.attempt_spawn(DESTRUCTOR, [point[0], point[1] - 1])
 
+    def get_nice_spawn(self, game_state):
+        """returns a nice fukn spawn"""
+        right_last =  [14, 0]
+        left_last = [13, 0]
+        for plausible in [[19, 5], [18, 4], [17, 3], [16, 2], [15, 1]][::-1]:
+            if game_state.contains_stationary_unit(plausible):
+                right_last = plausible
+            else:
+                break
+        for plausible in [[8, 5], [9, 4], [10, 3], [11, 2], [12, 1]][::-1]:
+            if game_state.contains_stationary_unit(plausible):
+                left_last = plausible
+            else:
+                break
+        return (left_last, right_last)
 
     def stall_with_scramblers(self, game_state):
         """
@@ -154,16 +170,9 @@ class AlgoStrategy(gamelib.AlgoCore):
         deploy_locations = self.filter_blocked_locations(friendly_edges, game_state)
         
         # While we have remaining bits to spend lets send out scramblers randomly.
-        while game_state.get_resource(game_state.BITS) >= game_state.type_cost(SCRAMBLER) and len(deploy_locations) > 0:
-            # Choose a random deploy location.
-            deploy_index = random.randint(0, len(deploy_locations) - 1)
-            deploy_location = deploy_locations[deploy_index]
-            
-            game_state.attempt_spawn(SCRAMBLER, deploy_location)
-            """
-            We don't have to remove the location since multiple information 
-            units can occupy the same space.
-            """
+        left, right = self.get_nice_spawn(game_state)
+        game_state.attempt_spawn(SCRAMBLER, left)
+        game_state.attempt_spawn(SCRAMBLER, right)
 
     def emp_line_strategy(self, game_state):
         """
