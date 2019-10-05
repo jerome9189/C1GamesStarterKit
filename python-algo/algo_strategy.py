@@ -76,9 +76,12 @@ class AlgoStrategy(gamelib.AlgoCore):
         self.build_defences(game_state)
         # Now build reactive defenses based on where the enemy scored
         self.build_reactive_defense(game_state)
-        self.stall_with_scramblers(game_state)
-	if game_state.BITS > game_state.enemy_health:
-            ping_cannon_spawn = self.least_damage_spawn_location(game_state, self.get_nice_spawn())	
+
+        if game_state._player_resources[1]['bits'] >= 6: 
+            self.stall_with_scramblers(game_state)
+        
+        if game_state.enemy_health <= game_state.BITS:
+            self.ping_cannon(game_state, game_state.BITS)
 
         # If the turn is less than 5, stall with Scramblers and wait to see enemy's base
         # if game_state.turn_number < 5:
@@ -102,6 +105,11 @@ class AlgoStrategy(gamelib.AlgoCore):
         #         # Lastly, if we have spare cores, let's build some Encryptors to boost our Pings' health.
         #         encryptor_locations = [[13, 2], [14, 2], [13, 3], [14, 3]]
         #         game_state.attempt_spawn(ENCRYPTOR, encryptor_locations)
+
+    def ping_cannon(self, game_state, pings):
+        ping_cannon_spawn = self.least_damage_spawn_location(game_state, self.get_nice_spawn())	
+        for i in range(pings):
+            game_state.attempt_spawn(PING, ping_cannon_spawn)
 
     def build_defences(self, game_state):
         """
