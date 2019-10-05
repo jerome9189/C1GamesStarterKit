@@ -79,8 +79,8 @@ class AlgoStrategy(gamelib.AlgoCore):
         # Now build reactive defenses based on where the enemy scored
         self.build_reactive_defense(game_state)
 
-        if game_state.enemy_health <= game_state.BITS or game_state.BITS >= 6:
-            self.ping_cannon(game_state, game_state.BITS)
+        if game_state._player_resources[0]['bits'] >= 6:
+            self.ping_cannon(game_state, game_state._player_resources[0]['bits'])
         
         if game_state._player_resources[1]['bits'] >= 6: 
             self.stall_with_scramblers(game_state)
@@ -109,7 +109,7 @@ class AlgoStrategy(gamelib.AlgoCore):
         #         game_state.attempt_spawn(ENCRYPTOR, encryptor_locations)
 
     def ping_cannon(self, game_state, pings):
-        ping_cannon_spawn = self.least_damage_spawn_location(game_state, self.get_nice_spawn())	
+        ping_cannon_spawn = self.least_damage_spawn_location(game_state, self.get_nice_spawn())
         for i in range(pings):
             game_state.attempt_spawn(PING, ping_cannon_spawn)
 
