@@ -136,13 +136,18 @@ class AlgoStrategy(gamelib.AlgoCore):
     def build_triangle_funnel(self, game_state, side='right'):
         if side.startswith('r'):
             spawn_points = [[14, 13], [15, 13], [16, 13], [17, 13], [18, 13], [19, 13], [20, 13], [21, 13], [22, 13], [23, 13], [14, 12], [22, 12], [14, 11], [21, 11], [14, 10], [20, 10], [14, 9], [19, 9], [14, 8], [18, 8], [14, 7], [17, 7], [14, 6], [16, 6], [14, 5], [15, 5], [14, 4]]
+            destructor_points = [[14, 13], [14, 12], [14, 10], [14, 7], [14, 5], [14, 4]]
         elif side.startswith('l'):
             spawn_points = [[4, 13], [5, 13], [6, 13], [7, 13], [8, 13], [9, 13], [10, 13], [11, 13], [12, 13], [5, 12], [12, 12], [6, 11], [12, 11], [7, 10], [12, 10], [8, 9], [12, 9], [9, 8], [12, 8], [10, 7], [12, 7], [11, 6], [12, 6], [12, 5]]
+            destructor_points = [[12, 13], [12, 12], [12, 10], [12, 7], [12, 6], [12, 5]]
         else:
             spawn_points = []
+            destructor_points = []
     
         for _ in spawn_points:
             game_state.attempt_spawn(ENCRYPTOR, _)
+        for _ in destructor_points:
+            game_state.attempt_spawn(DESTRUCTOR, _)
 
     def build_reactive_defense(self, game_state):
         """
