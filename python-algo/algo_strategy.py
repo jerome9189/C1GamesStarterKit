@@ -77,6 +77,8 @@ class AlgoStrategy(gamelib.AlgoCore):
         # Now build reactive defenses based on where the enemy scored
         self.build_reactive_defense(game_state)
         self.stall_with_scramblers(game_state)
+	if game_state.BITS > game_state.enemy_health:
+            ping_cannon_spawn = self.least_damage_spawn_location(game_state, self.get_nice_spawn())	
 
         # If the turn is less than 5, stall with Scramblers and wait to see enemy's base
         # if game_state.turn_number < 5:
