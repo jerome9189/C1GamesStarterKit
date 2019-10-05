@@ -26,6 +26,7 @@ class AlgoStrategy(gamelib.AlgoCore):
         super().__init__()
         seed = random.randrange(maxsize)
         random.seed(seed)
+        self.min_ping_threshold = 6
         gamelib.debug_write('Random seed: {}'.format(seed))
 
     def on_game_start(self, config):
@@ -79,7 +80,7 @@ class AlgoStrategy(gamelib.AlgoCore):
         # Now build reactive defenses based on where the enemy scored
         self.build_reactive_defense(game_state)
 
-        if game_state._player_resources[0]['bits'] >= 6:
+        if game_state._player_resources[0]['bits'] >= self.min_ping_threshold:
             self.ping_cannon(game_state, game_state._player_resources[0]['bits'])
         
         if game_state._player_resources[1]['bits'] >= 6: 
@@ -109,8 +110,8 @@ class AlgoStrategy(gamelib.AlgoCore):
         #         game_state.attempt_spawn(ENCRYPTOR, encryptor_locations)
 
     def ping_cannon(self, game_state, pings):
-        ping_cannon_spawn = self.least_damage_spawn_location(game_state, self.get_nice_spawn())
-        for i in range(pings):
+        ping_cannon_spawn = self.least_damage_spawn_location(game_state, self.get_nice_spawn(game_state))
+        for i in range(int(pings)):
             game_state.attempt_spawn(PING, ping_cannon_spawn)
 
     def build_defences(self, game_state):
