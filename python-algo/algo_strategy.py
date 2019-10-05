@@ -130,6 +130,10 @@ class AlgoStrategy(gamelib.AlgoCore):
         # attempt_spawn will try to spawn units if we have resources, and will check if a blocking unit is already there
         game_state.attempt_spawn(DESTRUCTOR, destructors_points)
 
+    def build_triangle_funnel(self, game_state):
+        spawn_points = [[14, 13], [15, 13], [16, 13], [17, 13], [18, 13], [19, 13], [20, 13], [21, 13], [22, 13], [23, 13], [14, 12], [22, 12], [14, 11], [21, 11], [14, 10], [20, 10], [14, 9], [19, 9], [14, 8], [18, 8], [14, 7], [17, 7], [14, 6], [16, 6], [14, 5], [15, 5], [14, 4]]
+        game_state.attempt_spawn(ENCRYPTOR, spawn_points)
+
     def build_reactive_defense(self, game_state):
         """
         This function builds reactive defenses based on where the enemy scored on us from.
