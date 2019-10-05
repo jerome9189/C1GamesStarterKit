@@ -79,7 +79,7 @@ class AlgoStrategy(gamelib.AlgoCore):
         # Now build reactive defenses based on where the enemy scored
         self.build_reactive_defense(game_state)
 
-        if game_state.enemy_health <= game_state.BITS or game_state.BITS >= 10:
+        if game_state.enemy_health <= game_state.BITS or game_state.BITS >= 6:
             self.ping_cannon(game_state, game_state.BITS)
         
         if game_state._player_resources[1]['bits'] >= 6: 
@@ -185,19 +185,19 @@ class AlgoStrategy(gamelib.AlgoCore):
 
         left_count = 0
         for coord in left_coords:
-            units = game_state.game_map[*coord]
+            units = game_state.game_map[coord[0], coord[1]]
             for unit in units:
                 left_count += unit.damage_i * unit.range
 
         right_count = 0
         for coord in right_coords:
-            units = game_state.game_map[*coord]
+            units = game_state.game_map[coord[0], coord[1]]
             for unit in units:
                 right_count += unit.damage_i * unit.range
 
         mid_count = 0
         for coord in mid_coords:
-            units = game_state.game_map[*coord]
+            units = game_state.game_map[coord[0], coord[1]]
             for unit in units:
                 mid_count += unit.damage_i * unit.range
 
