@@ -10,3 +10,6 @@ dist/*
 
 *.zip
 */.idea/*
+
+.env
+.vscode

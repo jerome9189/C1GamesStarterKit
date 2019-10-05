@@ -43,8 +43,6 @@ class AlgoStrategy(gamelib.AlgoCore):
         self.scored_on_locations = []
 
     
-        
-
     def on_turn(self, turn_state):
         """
         This function is called every turn with the game state wrapper as
@@ -66,7 +64,6 @@ class AlgoStrategy(gamelib.AlgoCore):
     NOTE: All the methods after this point are part of the sample starter-algo
     strategy and can safely be replaced for your custom algo.
     """
-
 
     def starter_strategy(self, game_state):
         """
@@ -111,14 +108,14 @@ class AlgoStrategy(gamelib.AlgoCore):
         # Useful tool for setting up your base locations: https://www.kevinbai.design/terminal-map-maker
         # More community tools available at: https://terminal.c1games.com/rules#Download
 
-        # Place destructors that attack enemy units
-        destructor_locations = [[0, 13], [27, 13], [8, 11], [19, 11], [13, 11], [14, 11]]
+        destructors_points = [[0, 13], [1, 13], [2, 13], [25, 13], [26, 13], [27, 13], [5, 10], [22, 10], [8, 7], [19, 7], [11, 4], [16, 4], [12, 3], [15, 3]]
+        encryptors_points = [[3, 12], [24, 12], [4, 11], [23, 11], [6, 9], [21, 9], [7, 8], [20, 8], [9, 6], [18, 6], [10, 5], [17, 5]]
+
+        # Encrypter locations
+        game_state.attempt_spawn(ENCRYPTOR, encryptors_points)
+
         # attempt_spawn will try to spawn units if we have resources, and will check if a blocking unit is already there
-        game_state.attempt_spawn(DESTRUCTOR, destructor_locations)
-        
-        # Place filters in front of destructors to soak up damage for them
-        filter_locations = [[8, 12], [19, 12]]
-        game_state.attempt_spawn(FILTER, filter_locations)
+        game_state.attempt_spawn(DESTRUCTOR, destructors_points)
 
     def build_reactive_defense(self, game_state):
         """
@@ -126,10 +123,24 @@ class AlgoStrategy(gamelib.AlgoCore):
         We can track where the opponent scored by looking at events in action frames 
         as shown in the on_action_frame function
         """
+
+        def euclidean_distance(x1,y1,x2,y2):
+            return ((x1 - x2) ** 2 + (y1 - y2) ** 2) ** 0.5
+
+        important_points = [[0, 13], [1, 13], [2, 13], [25, 13], [26, 13], [27, 13], [5, 10], [22, 10], [8, 7], [19, 7], [11, 4], [16, 4], [12, 3], [15, 3]]
+        important_points += [[3, 12], [24, 12], [4, 11], [23, 11], [6, 9], [21, 9], [7, 8], [20, 8], [9, 6], [18, 6], [10, 5], [17, 5]]
+
+        czech_republic_black_sites = [[10, 3], [11, 3], [16, 3], [17, 3], [11, 2], [12, 2], [13, 2], [14, 2], [15, 2], [16, 2], [12, 1], [13, 1], [14, 1], [15, 1], [13, 0], [14, 0]]
+
         for location in self.scored_on_locations:
             # Build destructor one space above so that it doesn't block our own edge spawn locations
-            build_location = [location[0], location[1]+1]
-            game_state.attempt_spawn(DESTRUCTOR, build_location)
+            for point in important_points:
+                if euclidean_distance(location[0], location[1], point[0], point[1]) < 4: # some arbitrary threshold idk
+                    if point not in czech_republic_black_sites:
+                        game_state.attempt_spawn(DESTRUCTOR, point)
+                    if [point[0], point[1] - 1] not in czech_republic_black_sites:
+                        game_state.attempt_spawn(DESTRUCTOR, [point[0], point[1] - 1])
+
 
     def stall_with_scramblers(self, game_state):
         """
