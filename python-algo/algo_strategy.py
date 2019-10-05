@@ -81,7 +81,7 @@ class AlgoStrategy(gamelib.AlgoCore):
         # Now build reactive defenses based on where the enemy scored
         self.build_reactive_defense(game_state)
         
-        if game_state._player_resources[1]['bits'] >= 6 and game_state.my_health < game_state.enemy_health: 
+        if game_state._player_resources[1]['bits'] >= self.min_ping_threshold and game_state.my_health < game_state.enemy_health: 
             self.stall_with_scramblers(game_state)
 
         if self.ping_cannon_last_turn and (self.last_enemy_health == game_state.enemy_health):
@@ -93,11 +93,8 @@ class AlgoStrategy(gamelib.AlgoCore):
         else:
             self.ping_cannon_last_turn = False
         
-        if game_state._player_resources[1]['bits'] >= 6 and game_state.my_health >= game_state.enemy_health: 
+        if game_state._player_resources[1]['bits'] >= self.min_ping_threshold and game_state.my_health >= game_state.enemy_health: 
             self.stall_with_scramblers(game_state)
-
-        
-
         
 
         # If the turn is less than 5, stall with Scramblers and wait to see enemy's base
@@ -277,8 +274,8 @@ class AlgoStrategy(gamelib.AlgoCore):
         
         # While we have remaining bits to spend lets send out scramblers randomly.
         left, right = self.get_nice_spawn(game_state)
-        game_state.attempt_spawn(SCRAMBLER, left)
-        game_state.attempt_spawn(SCRAMBLER, right)
+        game_state.attempt_spawn(SCRAMBLER, left, n=int(self.min_ping_threshold/6))
+        game_state.attempt_spawn(SCRAMBLER, right, n=int(self.min_ping_threshold/6))
 
     def emp_line_strategy(self, game_state):
         """
