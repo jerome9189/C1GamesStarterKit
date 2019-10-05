@@ -27,6 +27,7 @@ class AlgoStrategy(gamelib.AlgoCore):
         self.min_ping_threshold = 6
         self.ping_cannon_last_turn = False
         self.last_enemy_health = 40
+        self.funnel_spawned = False
         gamelib.debug_write('Random seed: {}'.format(seed))
 
     def on_game_start(self, config):
@@ -143,19 +144,26 @@ class AlgoStrategy(gamelib.AlgoCore):
 
     def build_triangle_funnel(self, game_state, side='right'):
         if side.startswith('r'):
-            spawn_points = [[15, 13], [16, 13], [17, 13], [18, 13], [19, 13], [20, 13], [21, 13], [22, 13], [21, 12], [14, 11], [20, 11], [14, 10], [19, 10], [18, 9], [14, 8], [17, 8], [14, 7], [16, 7], [15, 6]]
-            destructor_points = [[14, 13], [14, 12], [14, 9], [14, 6], [14, 5]]
+            spawn_points = [[15, 11], [16, 11], [17, 11], [18, 11], [19, 11], [20, 11], [19, 10], [14, 9], [18, 9], [17, 8], [14, 7], [16, 7], [15, 6]]
+            destructor_points = [[14, 11], [14, 10], [14, 8], [14, 6], [14, 5]]
         elif side.startswith('l'):
-            spawn_points = [[5, 13], [6, 13], [7, 13], [8, 13], [9, 13], [10, 13], [11, 13], [6, 12], [7, 11], [12, 11], [8, 10], [9, 9], [12, 9], [10, 8], [12, 8], [11, 7], [12, 6]]
-            destructor_points = [[12, 13], [12, 12], [12, 10], [12, 7]]
+            spawn_points = [[7, 11], [8, 11], [9, 11], [10, 11], [11, 11], [8, 10], [9, 9], [12, 9], [10, 8], [12, 8], [11, 7]]
+            destructor_points = [[12, 11], [12, 10], [12, 7], [12, 6]]
         else:
             spawn_points = []
             destructor_points = []
     
-        for _ in spawn_points:
-            game_state.attempt_spawn(ENCRYPTOR, _)
-        for _ in destructor_points:
-            game_state.attempt_spawn(DESTRUCTOR, _)
+        if self.funnel_spawned:
+            for _ in spawn_points:
+                game_state.attempt_spawn(DESTRUCTOR, _)
+            for _ in destructor_points:
+                game_state.attempt_spawn(DESTRUCTOR, _)
+        else:
+            self.funnel_spawned = True
+            for _ in spawn_points:
+                game_state.attempt_spawn(ENCRYPTOR, _)
+            for _ in destructor_points:
+                game_state.attempt_spawn(DESTRUCTOR, _)
 
     def build_reactive_defense(self, game_state):
         """
