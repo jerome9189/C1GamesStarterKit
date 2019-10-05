@@ -24,6 +24,7 @@ class AlgoStrategy(gamelib.AlgoCore):
         super().__init__()
         seed = random.randrange(maxsize)
         random.seed(seed)
+        self.min_ping_threshold = 6
         gamelib.debug_write('Random seed: {}'.format(seed))
 
     def on_game_start(self, config):
@@ -77,8 +78,8 @@ class AlgoStrategy(gamelib.AlgoCore):
         # Now build reactive defenses based on where the enemy scored
         self.build_reactive_defense(game_state)
 
-        if game_state.enemy_health <= game_state.BITS or game_state.BITS >= 10:
-            self.ping_cannon(game_state, game_state.BITS)
+        if game_state._player_resources[0]['bits'] >= self.min_ping_threshold:
+            self.ping_cannon(game_state, game_state._player_resources[0]['bits'])
         
         if game_state._player_resources[1]['bits'] >= 6: 
             self.stall_with_scramblers(game_state)
@@ -107,8 +108,8 @@ class AlgoStrategy(gamelib.AlgoCore):
         #         game_state.attempt_spawn(ENCRYPTOR, encryptor_locations)
 
     def ping_cannon(self, game_state, pings):
-        ping_cannon_spawn = self.least_damage_spawn_location(game_state, self.get_nice_spawn())	
-        for i in range(pings):
+        ping_cannon_spawn = self.least_damage_spawn_location(game_state, self.get_nice_spawn(game_state))
+        for i in range(int(pings)):
             game_state.attempt_spawn(PING, ping_cannon_spawn)
 
     def build_defences(self, game_state):
@@ -127,6 +128,10 @@ class AlgoStrategy(gamelib.AlgoCore):
 
         # attempt_spawn will try to spawn units if we have resources, and will check if a blocking unit is already there
         game_state.attempt_spawn(DESTRUCTOR, destructors_points)
+
+    def build_triangle_funnel(self, game_state):
+        spawn_points = [[14, 13], [15, 13], [16, 13], [17, 13], [18, 13], [19, 13], [20, 13], [21, 13], [22, 13], [23, 13], [14, 12], [22, 12], [14, 11], [21, 11], [14, 10], [20, 10], [14, 9], [19, 9], [14, 8], [18, 8], [14, 7], [17, 7], [14, 6], [16, 6], [14, 5], [15, 5], [14, 4]]
+        game_state.attempt_spawn(ENCRYPTOR, spawn_points)
 
     def build_reactive_defense(self, game_state):
         """
@@ -179,19 +184,19 @@ class AlgoStrategy(gamelib.AlgoCore):
 
         left_count = 0
         for coord in left_coords:
-            units = game_state.game_map[*coord]
+            units = game_state.game_map[coord[0], coord[1]]
             for unit in units:
                 left_count += unit.damage_i * unit.range
 
         right_count = 0
         for coord in right_coords:
-            units = game_state.game_map[*coord]
+            units = game_state.game_map[coord[0], coord[1]]
             for unit in units:
                 right_count += unit.damage_i * unit.range
 
         mid_count = 0
         for coord in mid_coords:
-            units = game_state.game_map[*coord]
+            units = game_state.game_map[coord[0], coord[1]]
             for unit in units:
                 mid_count += unit.damage_i * unit.range
 
