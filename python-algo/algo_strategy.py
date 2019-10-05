@@ -84,7 +84,7 @@ class AlgoStrategy(gamelib.AlgoCore):
             self.stall_with_scramblers(game_state)
 
         if self.ping_cannon_last_turn and (self.last_enemy_health == game_state.enemy_health):
-            self.min_ping_threshold += 2
+            self.min_ping_threshold = int(self.min_ping_threshold * 1.5)
 
         if game_state._player_resources[0]['bits'] >= self.min_ping_threshold:           
             self.ping_cannon(game_state, game_state._player_resources[0]['bits'])
