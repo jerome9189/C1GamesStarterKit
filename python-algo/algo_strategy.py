@@ -20,6 +20,8 @@ Advanced strategy tips:
 """
 
 class AlgoStrategy(gamelib.AlgoCore):
+    DEFENSE_WEIGHTS = {"FILTER": 1, "ENCRYPTOR": 1, "DESTRUCTOR": 2}
+
     def __init__(self):
         super().__init__()
         seed = random.randrange(maxsize)
@@ -76,7 +78,12 @@ class AlgoStrategy(gamelib.AlgoCore):
         self.build_defences(game_state)
         # Now build reactive defenses based on where the enemy scored
         self.build_reactive_defense(game_state)
-        self.stall_with_scramblers(game_state)
+
+        if game_state.enemy_health <= game_state.BITS or game_state.BITS >= 10:
+            self.ping_cannon(game_state, game_state.BITS)
+        
+        if game_state._player_resources[1]['bits'] >= 6: 
+            self.stall_with_scramblers(game_state)
 
         # If the turn is less than 5, stall with Scramblers and wait to see enemy's base
         # if game_state.turn_number < 5:
@@ -100,6 +107,11 @@ class AlgoStrategy(gamelib.AlgoCore):
         #         # Lastly, if we have spare cores, let's build some Encryptors to boost our Pings' health.
         #         encryptor_locations = [[13, 2], [14, 2], [13, 3], [14, 3]]
         #         game_state.attempt_spawn(ENCRYPTOR, encryptor_locations)
+
+    def ping_cannon(self, game_state, pings):
+        ping_cannon_spawn = self.least_damage_spawn_location(game_state, self.get_nice_spawn())	
+        for i in range(pings):
+            game_state.attempt_spawn(PING, ping_cannon_spawn)
 
     def build_defences(self, game_state):
         """
@@ -158,6 +170,42 @@ class AlgoStrategy(gamelib.AlgoCore):
                 break
         return (left_last, right_last)
 
+    def pick_attack_side(self, game_state):
+        left_coords = [[4, 18], [5, 18], [3, 17], [4, 17], [5, 17], [6, 17], [2, 16], [3, 16], [4, 16], [5, 16], [6, 16], [1, 15], [2, 15], [3, 15],
+         [4, 15], [5, 15], [6, 15], [0, 14], [1, 14], [2, 14], [3, 14], [4, 14], [5, 14], [6, 14]]
+        
+        right_coords = [[22, 18], [23, 18], [21, 17], [22, 17], [23, 17], [24, 17], [21, 16], [22, 16], [23, 16], [24, 16], [25, 16], [21, 15], [22, 15], [23, 15],
+        [24, 15], [25, 15], [26, 15], [21, 14], [22, 14], [23, 14], [24, 14], [25, 14], [26, 14], [27, 14]]
+
+        mid_coords = [[13, 27], [14, 27], [12, 26], [13, 26], [14, 26], [15, 26], [11, 25], [12, 25], [13, 25], [14, 25], [15, 25], [16, 25], [10, 24], [11, 24], [12, 24], [13, 24], [14, 24], [15, 24], [16, 24], [17, 24], [9, 23], [10, 23], [11, 23], [12, 23], [13, 23], [14, 23], [15, 23], [16, 23], [17, 23], [18, 23], [8, 22], [9, 22], [10, 22], [11, 22], [12, 22], [13, 22], [14, 22], [15, 22], [16, 22], [17, 22], [18, 22], [19, 22], [9, 21], [10, 21], [11, 21], [12, 21], [13, 21], [14, 21], [15, 21], [16, 21], [17, 21], [18, 21], [10, 20], [11, 20], [12, 20], [13, 20], [14, 20], [15, 20], [16, 20], [17, 20], [11, 19], [12, 19], [13, 19], [14, 19], [15, 19], [16, 19], [12, 18], [13, 18], [14, 18], [15, 18], [13, 17], [14, 17]]
+
+        left_count = 0
+        for coord in left_coords:
+            units = game_state.game_map[*coord]
+            for unit in units:
+                left_count += unit.damage_i * unit.range
+
+        right_count = 0
+        for coord in right_coords:
+            units = game_state.game_map[*coord]
+            for unit in units:
+                right_count += unit.damage_i * unit.range
+
+        mid_count = 0
+        for coord in mid_coords:
+            units = game_state.game_map[*coord]
+            for unit in units:
+                mid_count += unit.damage_i * unit.range
+
+        min_count = min(left_count, right_count, mid_count)
+
+        if (min_count == left_count):
+            return "LEFT"
+        elif (min_count == right_count):
+            return "RIGHT"
+        else:
+            return "MID"
+        
     def stall_with_scramblers(self, game_state):
         """
         Send out Scramblers at random locations to defend our base from enemy moving units.
@@ -213,7 +261,7 @@ class AlgoStrategy(gamelib.AlgoCore):
             damages.append(damage)
         
         # Now just return the location that takes the least damage
-        return location_options[damages.index(min(damages))]
+        return location_options[damages.index(min(damages))]      
 
     def detect_enemy_unit(self, game_state, unit_type=None, valid_x = None, valid_y = None):
         total_units = 0
