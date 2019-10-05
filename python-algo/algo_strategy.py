@@ -20,13 +20,13 @@ Advanced strategy tips:
 """
 
 class AlgoStrategy(gamelib.AlgoCore):
-    DEFENSE_WEIGHTS = {"FILTER": 1, "ENCRYPTOR": 1, "DESTRUCTOR": 2}
-
     def __init__(self):
         super().__init__()
         seed = random.randrange(maxsize)
         random.seed(seed)
         self.min_ping_threshold = 6
+        self.ping_cannon_last_turn = false
+        self.last_enemy_health = game_state.enemy_health
         gamelib.debug_write('Random seed: {}'.format(seed))
 
     def on_game_start(self, config):
@@ -79,10 +79,15 @@ class AlgoStrategy(gamelib.AlgoCore):
         self.build_defences(game_state)
         # Now build reactive defenses based on where the enemy scored
         self.build_reactive_defense(game_state)
+        if self.ping_cannon_last_turn and (self.last_enemy_health < game_state.enemy_health):
+            self.min_ping_threshold += 2
 
-        if game_state._player_resources[0]['bits'] >= self.min_ping_threshold:
+        if game_state._player_resources[0]['bits'] >= self.min_ping_threshold:           
             self.ping_cannon(game_state, game_state._player_resources[0]['bits'])
-
+            self.ping_cannon_last_turn = turn_number
+        else:
+            self.ping_cannon_last_turn = false
+        
         if game_state._player_resources[1]['bits'] >= 6: 
             self.stall_with_scramblers(game_state)
 
