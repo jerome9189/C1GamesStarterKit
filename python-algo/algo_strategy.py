@@ -147,8 +147,8 @@ class AlgoStrategy(gamelib.AlgoCore):
 
     def build_triangle_funnel(self, game_state, side='right'):
         if side.startswith('r'):
-            spawn_points = [[15, 11], [16, 11], [17, 11], [18, 11], [19, 11], [20, 11], [19, 10], [14, 9], [18, 9], [17, 8], [14, 7], [16, 7], [15, 6]]
-            destructor_points = [[14, 11], [14, 10], [14, 8], [14, 6], [14, 5]]
+            spawn_points = [[16, 11], [17, 11], [18, 11], [19, 11], [20, 11], [19, 10], [15, 9], [18, 9], [15, 8], [17, 8], [16, 7]]
+            destructor_points = [[15, 11], [15, 10], [15, 7], [15, 6]]
         elif side.startswith('l'):
             spawn_points = [[7, 11], [8, 11], [9, 11], [10, 11], [11, 11], [8, 10], [9, 9], [12, 9], [10, 8], [12, 8], [11, 7]]
             destructor_points = [[12, 11], [12, 10], [12, 7], [12, 6]]
