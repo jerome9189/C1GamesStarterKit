@@ -27,6 +27,7 @@ class AlgoStrategy(gamelib.AlgoCore):
         self.min_ping_threshold = 6
         self.ping_cannon_last_turn = False
         self.last_enemy_health = 40
+        self.funnel_spawned = False
         gamelib.debug_write('Random seed: {}'.format(seed))
 
     def on_game_start(self, config):
@@ -79,8 +80,12 @@ class AlgoStrategy(gamelib.AlgoCore):
         self.build_defences(game_state)
         # Now build reactive defenses based on where the enemy scored
         self.build_reactive_defense(game_state)
-        if self.ping_cannon_last_turn and (self.last_enemy_health < game_state.enemy_health):
-            self.min_ping_threshold += 2
+        
+        if game_state._player_resources[1]['bits'] >= 6 and game_state.my_health < game_state.enemy_health: 
+            self.stall_with_scramblers(game_state)
+
+        if self.ping_cannon_last_turn and (self.last_enemy_health == game_state.enemy_health):
+            self.min_ping_threshold = int(self.min_ping_threshold * 1.5)
 
         if game_state._player_resources[0]['bits'] >= self.min_ping_threshold:           
             self.ping_cannon(game_state, game_state._player_resources[0]['bits'])
@@ -88,8 +93,10 @@ class AlgoStrategy(gamelib.AlgoCore):
         else:
             self.ping_cannon_last_turn = False
         
-        if game_state._player_resources[1]['bits'] >= 6: 
+        if game_state._player_resources[1]['bits'] >= 6 and game_state.my_health >= game_state.enemy_health: 
             self.stall_with_scramblers(game_state)
+
+        
 
         
 
@@ -149,10 +156,17 @@ class AlgoStrategy(gamelib.AlgoCore):
             spawn_points = []
             destructor_points = []
     
-        for _ in spawn_points:
-            game_state.attempt_spawn(ENCRYPTOR, _)
-        for _ in destructor_points:
-            game_state.attempt_spawn(DESTRUCTOR, _)
+        if self.funnel_spawned:
+            for _ in spawn_points:
+                game_state.attempt_spawn(DESTRUCTOR, _)
+            for _ in destructor_points:
+                game_state.attempt_spawn(DESTRUCTOR, _)
+        else:
+            self.funnel_spawned = True
+            for _ in spawn_points:
+                game_state.attempt_spawn(ENCRYPTOR, _)
+            for _ in destructor_points:
+                game_state.attempt_spawn(DESTRUCTOR, _)
 
     def build_reactive_defense(self, game_state):
         """
