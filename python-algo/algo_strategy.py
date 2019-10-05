@@ -86,6 +86,8 @@ class AlgoStrategy(gamelib.AlgoCore):
         if game_state._player_resources[1]['bits'] >= 6: 
             self.stall_with_scramblers(game_state)
 
+        
+
         # If the turn is less than 5, stall with Scramblers and wait to see enemy's base
         # if game_state.turn_number < 5:
         #     self.stall_with_scramblers(game_state)
@@ -136,7 +138,11 @@ class AlgoStrategy(gamelib.AlgoCore):
             spawn_points = [[14, 13], [15, 13], [16, 13], [17, 13], [18, 13], [19, 13], [20, 13], [21, 13], [22, 13], [23, 13], [14, 12], [22, 12], [14, 11], [21, 11], [14, 10], [20, 10], [14, 9], [19, 9], [14, 8], [18, 8], [14, 7], [17, 7], [14, 6], [16, 6], [14, 5], [15, 5], [14, 4]]
         elif side.startswith('l'):
             spawn_points = [[4, 13], [5, 13], [6, 13], [7, 13], [8, 13], [9, 13], [10, 13], [11, 13], [12, 13], [5, 12], [12, 12], [6, 11], [12, 11], [7, 10], [12, 10], [8, 9], [12, 9], [9, 8], [12, 8], [10, 7], [12, 7], [11, 6], [12, 6], [12, 5]]
-        game_state.attempt_spawn(ENCRYPTOR, spawn_points)
+        else:
+            spawn_points = []
+    
+        for _ in spawn_points:
+            game_state.attempt_spawn(ENCRYPTOR, _)
 
     def build_reactive_defense(self, game_state):
         """
@@ -162,6 +168,8 @@ class AlgoStrategy(gamelib.AlgoCore):
                     if [point[0], point[1] - 1] not in czech_republic_black_sites:
                         game_state.attempt_spawn(DESTRUCTOR, [point[0], point[1] - 1])
 
+        self.build_triangle_funnel(game_state, self.pick_defense_side(game_state))
+
     def get_nice_spawn(self, game_state):
         """returns a nice fukn spawn"""
         right_last =  [14, 0]
@@ -177,6 +185,21 @@ class AlgoStrategy(gamelib.AlgoCore):
             else:
                 break
         return (left_last, right_last)
+
+    def pick_defense_side(self, game_state):
+        lefts = 0
+        rights = 0
+        for coordinate in self.scored_on_locations:
+            if coordinate[0] <= 13:
+                lefts += 1
+            elif coordinate[0] >= 14:
+                rights += 1
+        if lefts > rights:
+            return 'left'
+        elif rights > lefts:
+            return 'right'
+        else:
+            return 'center'
 
     def pick_attack_side(self, game_state):
         left_coords = [[4, 18], [5, 18], [3, 17], [4, 17], [5, 17], [6, 17], [2, 16], [3, 16], [4, 16], [5, 16], [6, 16], [1, 15], [2, 15], [3, 15],
